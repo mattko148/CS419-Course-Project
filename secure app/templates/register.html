@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Create Account - CS 419 Project{% endblock %}
+{% block body %}
+<div class="container-sm">
+  <div style="text-align:center; margin-bottom:2rem;">
+    <div style="font-size:2rem; margin-bottom:0.5rem;">📄</div>
+    <h1 style="font-size:1.6rem; font-weight:700;">CS 419 Project</h1>
+    <p class="text-muted text-sm mt-1">Create your account</p>
+  </div>
+
+  <div class="card">
+    <h2>Create account</h2>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/register">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirm_password">Confirm password</label>
+        <input type="password" id="confirm_password" name="confirm_password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full mt-2">Create account</button>
+    </form>
+
+    <p class="text-sm text-muted mt-2" style="text-align:center;">
+      Already have an account? <a href="/login">Sign in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

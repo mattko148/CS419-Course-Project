@@ -1,0 +1,14 @@
+{
+  "eb0b7e4a-6660-4d8d-a26f-93fe2cc9f63d": {
+    "id": "eb0b7e4a-6660-4d8d-a26f-93fe2cc9f63d",
+    "original_name": "Test_file_1.txt",
+    "extension": "txt",
+    "owner": "foo",
+    "shared_with": {
+      "foo": "editor",
+      "abc": "editor"
+    },
+    "created_at": 1774333371.628829,
+    "stored_path": "data/uploads/eb0b7e4a-6660-4d8d-a26f-93fe2cc9f63d_Test_file_1.txt"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "foo": {
+    "username": "foo",
+    "email": "bar@example.com",
+    "password": "baz",
+    "role": "user",
+    "created_at": 1774325538.0500026
+  },
+  "abc": {
+    "username": "abc",
+    "email": "abc@example.com",
+    "password": "abc",
+    "role": "user",
+    "created_at": 1774325645.8812444
+  },
+  "123": {
+    "username": "123",
+    "email": "123@example.com",
+    "password": "123",
+    "role": "user",
+    "created_at": 1774332143.4977005
+  }
+}

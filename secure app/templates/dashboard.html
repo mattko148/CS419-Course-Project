@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - CS419 Project{% endblock %}
+{% block body %}
+<div class="container">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for cat, msg in messages %}
+      <div class="alert alert-{{ 'success' if cat == 'success' else 'error' }}">{{ msg }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="flex items-center justify-between" style="margin-bottom:1.75rem;">
+    <div>
+      <h1 class="page-title">My Documents</h1>
+      <p class="page-subtitle">Upload and share files with other users</p>
+    </div>
+    <label class="btn btn-primary" style="cursor:pointer;">
+      ＋ Upload file
+      <input type="file" id="file-input" style="display:none" onchange="uploadFile(this)">
+    </label>
+  </div>
+
+  <!-- Hidden upload form -->
+  <form id="upload-form" method="POST" action="/documents/upload"
+        enctype="multipart/form-data" style="display:none;">
+    <input type="file" name="file" id="upload-file-field">
+  </form>
+
+  {% if documents %}
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table>
+      <thead>
+        <tr>
+          <th>File name</th>
+          <th>Owner</th>
+          <th>Access</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in documents %}
+        <tr>
+          <td>
+            <span style="font-family: var(--mono); font-size:0.85rem;">
+              {{ doc.original_name }}
+            </span>
+          </td>
+          <td class="text-muted text-sm">{{ doc.owner }}</td>
+          <td class="text-sm">
+            {% if doc.owner == user.username %}
+              owner
+            {% else %}
+              {{ doc.shared_with[user.username] }}
+            {% endif %}
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <a href="/documents/{{ doc.id }}/download"
+                 class="btn btn-ghost btn-sm">↓ Download</a>
+
+              {% if doc.owner == user.username %}
+              <button class="btn btn-ghost btn-sm"
+                      onclick="toggleShare('share-{{ doc.id }}')">Share</button>
+              <form method="POST" action="/documents/{{ doc.id }}/delete"
+                    style="margin:0"
+                    onsubmit="return confirm('Delete this document?')">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+              {% endif %}
+            </div>
+
+            {% if doc.owner == user.username %}
+            <div id="share-{{ doc.id }}"
+                 style="display:none; margin-top:0.5rem; padding:0.75rem;
+                        background:var(--surface2); border-radius:7px;
+                        border:1px solid var(--border);">
+              <form method="POST" action="/documents/{{ doc.id }}/share"
+                    class="flex gap-2 items-center" style="flex-wrap:wrap;">
+                <input type="text" name="username" placeholder="Username"
+                       style="width:140px; font-size:0.82rem; padding:0.35rem 0.6rem;">
+                <select name="role"
+                        style="font-size:0.82rem; padding:0.35rem 0.6rem; width:auto;">
+                  <option value="viewer">Viewer</option>
+                  <option value="editor">Editor</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Share</button>
+              </form>
+              {% if doc.shared_with %}
+              <div style="margin-top:0.5rem;">
+                {% for uname, role in doc.shared_with.items() %}
+                <span class="text-muted text-sm">{{ uname }} ({{ role }})</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="card" style="text-align:center; padding:3rem;">
+    <div style="font-size:2.5rem; margin-bottom:1rem;">📄</div>
+    <p class="text-muted">No documents yet. Upload your first file.</p>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+function uploadFile(input) {
+  const form = document.getElementById('upload-form');
+  const field = document.getElementById('upload-file-field');
+  const dt = new DataTransfer();
+  dt.items.add(input.files[0]);
+  field.files = dt.files;
+  form.submit();
+}
+function toggleShare(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+{% endblock %}
