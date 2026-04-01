@@ -19,6 +19,7 @@ os.makedirs(Config.DATA_DIR, exist_ok=True)
 os.makedirs(Config.LOGS_DIR, exist_ok=True)
 os.makedirs(Config.UPLOADS_DIR, exist_ok=True)
 
+#which type of files are allowed
 ALLOWED_EXTENSIONS = {'pdf', 'txt', 'docx', 'png', 'jpg', 'jpeg'}
 
 
@@ -41,16 +42,19 @@ def create_session(username: str) -> str:
 def get_session_user(token: str):
     if not token:
         return None
+    #returning the json file
     sessions = load_sessions()
+    #in the json file, find the token
     session = sessions.get(token)
+    #if its not in there, then return none
     if not session:
         return None
     return get_user_by_username(session['username'])
 
 
-# ---------------------------------------------------------------------------
-# Load current user before every request
-# ---------------------------------------------------------------------------
+#requests cookies to get the session token (if there is one), then uses it to find out who is logged in
+#and sets the current user
+#do this for every time the user redirects to another page
 
 @app.before_request
 def load_user():
@@ -59,9 +63,8 @@ def load_user():
     g.session_token = token
 
 
-# ---------------------------------------------------------------------------
-# Routes — Auth
-# ---------------------------------------------------------------------------
+#home page, when going here, then it either goes to the users dashboard if they are logged in,
+#otherwise send them back to the login
 
 @app.route('/')
 def index():
@@ -70,12 +73,20 @@ def index():
     return redirect('/login')
 
 
+#page to register and create an account with GET and POST methods
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+
+    #saying "if youre logged in, what are you doing here? GO TO YOUR DASHBOARD"
     if g.user:
         return redirect('/dashboard')
     error = None
+
+    #the method is default GET when visiting the page (when clicking in from /login), then when the user
+    #presses "Create account", then the browser sends the entered user
+    #and password to flask and the method is set to POST   
     if request.method == 'POST':
+        #from the request package, inside the form get these inputs and get rid of whitespaces
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
@@ -100,20 +111,28 @@ def register():
                 'created_at': time.time(),
             })
             flash('Account created! Please log in.', 'success')
+            #go to login page once account is created
             return redirect('/login')
-
+    #when first visiting the page, it goes past the if statement above and comes down here and 
+    #renders the template first. The second time it comes around with the inputs from html.
     return render_template('register.html', error=error)
 
-
+#go to the page that lets a user log in with a username and password, or redirect to a 
+#page that lets them register a new account with GET and POST methods
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    #saying "WHY ARE YOU HERE IF YOURE LOGGED IN, GO TO YOUR DASHBOARD"
     if g.user:
         return redirect('/dashboard')
     error = None
+    #default GET again, skips over this the first time it loads (renders the template below), 
+    #then when the user clicks a submit button, then it sends a POST
     if request.method == 'POST':
+        #gets the username and password from the POST package
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
 
+        #use the entered username to find the user in the users json to compare password
         user = get_user_by_username(username)
 
         # TODO week 3: use bcrypt.checkpw, add lockout and rate limiting
@@ -126,18 +145,35 @@ def login():
             response.set_cookie('session_token', token)
             return response
 
+    #render the template the first time this page loads with GET 
     return render_template('login.html', error=error)
 
-
+#logout, only needs POST because this doesnt need to show any form, just do stuff
 @app.route('/logout', methods=['POST'])
 def logout():
+
+    #find the session token to figure out who is sending this logout request
+    #gets the token
     token = request.cookies.get('session_token')
     if token:
+        #load the existing sessions
         sessions = load_sessions()
+        #take the token out with the user, finds who has this token and pops out of dictionary
+        #gets rid of the users name and token(with user and password) out of dictionary
+
+        #IMPORTANT, if it still exists afterward then if someone gets this token later,
+        #they can use this token to log in as someone else without username or password.
+        #if you get rid of it from the json (like this) then even if someone obtains the token,
+        #it is still useless because the session DOES NOT EXIST, and does NOT allow someone to 
+        #log in without username and password
         sessions.pop(token, None)
+        #save this updated directory back
         save_sessions(sessions)
+    #create an object to redirect
     response = make_response(redirect('/login'))
+    #putting instruction to delete the session token from browser
     response.delete_cookie('session_token')
+    #sends this to browser which deletes the cookie then redirects to login page
     return response
 
 
@@ -145,12 +181,16 @@ def logout():
 # Routes — Dashboard
 # ---------------------------------------------------------------------------
 
+#defaulting to GET
 @app.route('/dashboard')
 def dashboard():
     # TODO week 3: replace with @require_auth decorator
     if not g.user:
         return redirect('/login')
+
+    #find the documents that either belond to you or were shared to you
     docs = get_user_documents(g.user['username'])
+    #take the python information/variables and match them into the html variable
     return render_template('dashboard.html', user=g.user, documents=docs)
 
 
@@ -163,18 +203,25 @@ def upload():
     if not g.user:
         return redirect('/login')
 
+    #checking if there was a file included inside the request package from browser
     if 'file' not in request.files:
         flash('No file selected.', 'error')
         return redirect('/dashboard')
 
+    #getting the file from the request   
     f = request.files['file']
+    #if there is no name inside the file, that means there is no file inside so something
+    #went wrong
     if not f.filename:
         flash('No file selected.', 'error')
         return redirect('/dashboard')
 
+    #uses werkzeug import which sanitizes the files input, getting rid of weird or dangerous file names
     filename = secure_filename(f.filename)
+    #getting the extension like txt, pdf, etc
     ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
 
+    #check if the extension is allowed or not, if its not then send them back to the dashboard
     if ext not in ALLOWED_EXTENSIONS:
         flash(f'File type not allowed.', 'error')
         return redirect('/dashboard')
