@@ -200,6 +200,7 @@ def dashboard():
 
 @app.route('/documents/upload', methods=['POST'])
 def upload():
+    #checking if a user is logged in, otherwise send them back to login
     if not g.user:
         return redirect('/login')
 
@@ -211,7 +212,7 @@ def upload():
     #getting the file from the request   
     f = request.files['file']
     #if there is no name inside the file, that means there is no file inside so something
-    #went wrong
+    #went wronge
     if not f.filename:
         flash('No file selected.', 'error')
         return redirect('/dashboard')
@@ -245,56 +246,82 @@ def upload():
     return redirect('/dashboard')
 
 
+#just GET again
+#user sends GET saying "i want the download with this link" (with doc_id inside the link)
+#flask runs get_user_documents on the users name (getting variables in place)
+#finds the document with the same doc id
+#flask sends back the correct file
 @app.route('/documents/<doc_id>/download')
 def download(doc_id: str):
+    #once again check if they are logged in
     if not g.user:
         return redirect('/login')
 
+    #using the doc id from the input, find the correct document
+    #doc is just the dictionary with the info about the doc
     doc = get_document(doc_id)
     if not doc:
         flash('Document not found.', 'error')
         return redirect('/dashboard')
 
     # TODO week 3: check access permissions properly
+    #do you have access?
     if doc['owner'] != g.user['username'] and \
        g.user['username'] not in doc.get('shared_with', {}):
         flash('Access denied.', 'error')
         return redirect('/dashboard')
 
     # TODO week 3: decrypt file before sending
+    #open up the file, using the docs "store path", go to the data/upload directory
     with open(doc['stored_path'], 'rb') as file:
         data = file.read()
 
+    #sending the file to the browser 
     return send_file(
+        #wrapping bytes into file like object
         io.BytesIO(data),
+        #telling browser what to name the download file
         download_name=doc['original_name'],
+        #download the file instead of trying to open it in the browser
         as_attachment=True,
     )
 
+#POST because we arent seeing anything but want to server to do something (like sending it to someone else)
+#similar to download above here, getting the document and doc id in a similar way
 
 @app.route('/documents/<doc_id>/share', methods=['POST'])
 def share(doc_id: str):
     if not g.user:
         return redirect('/login')
 
+    #using the doc id from the input, find the correct document
+    #doc is just the dictionary with the info about the doc
     doc = get_document(doc_id)
     if not doc or doc['owner'] != g.user['username']:
         flash('Access denied.', 'error')
         return redirect('/dashboard')
 
+    #get the name that the user sent in to request form
     target = request.form.get('username', '').strip()
+    #gets the role that was selected by the user, but if there was nothing then default it to viewer
     role = request.form.get('role', 'viewer')
 
+    #if the target doesnt exist, then cancel it request and send them back to dashboard
     if not get_user_by_username(target):
         flash('User not found.', 'error')
         return redirect('/dashboard')
 
+    #go to the dictionary for the doc and set the targets role to the selected role (also add them to the dictionary)
     doc['shared_with'][target] = role
+    #save the updated dictionary
     save_document(doc)
+    #notify that it was correctly and successfully done
     flash(f'Shared with {target} as {role}.', 'success')
     return redirect('/dashboard')
 
 
+#just POST, client sends a request for server to do something
+#getting doc once again in the same way
 @app.route('/documents/<doc_id>/delete', methods=['POST'])
 def delete_doc(doc_id: str):
     if not g.user:
@@ -305,16 +332,20 @@ def delete_doc(doc_id: str):
         flash('Access denied.', 'error')
         return redirect('/dashboard')
 
-    # Remove stored file
+    #try to get rid of the file, but if it doesnt exist the just throw an error
     try:
         os.remove(doc['stored_path'])
     except FileNotFoundError:
         pass
 
+    #load the entire list of documents
     docs = load_documents()
+    #pop it out of there
     docs.pop(doc_id, None)
+    #save the updated dictionary
     save_documents(docs)
 
+    #notify that it was successfully deleted
     flash('Document deleted.', 'success')
     return redirect('/dashboard')
 
