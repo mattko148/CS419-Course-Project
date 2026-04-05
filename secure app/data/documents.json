@@ -1,14 +1,28 @@
 {
-  "eb0b7e4a-6660-4d8d-a26f-93fe2cc9f63d": {
-    "id": "eb0b7e4a-6660-4d8d-a26f-93fe2cc9f63d",
+  "ab2cb6df-ddea-4867-ac76-0666119a8072": {
+    "id": "ab2cb6df-ddea-4867-ac76-0666119a8072",
     "original_name": "Test_file_1.txt",
     "extension": "txt",
-    "owner": "foo",
-    "shared_with": {
-      "foo": "editor",
-      "abc": "editor"
-    },
-    "created_at": 1774333371.628829,
-    "stored_path": "data/uploads/eb0b7e4a-6660-4d8d-a26f-93fe2cc9f63d_Test_file_1.txt"
+    "owner": "helloworld123",
+    "shared_with": {},
+    "created_at": 1775345736.6320436,
+    "versions": [
+      {
+        "version": 1,
+        "created_at": 1775345736.6320436,
+        "stored_path": "data/uploads/ab2cb6df-ddea-4867-ac76-0666119a8072.enc"
+      },
+      {
+        "version": 2,
+        "created_at": 1775345740.06058,
+        "stored_path": "data/uploads/ab2cb6df-ddea-4867-ac76-0666119a8072.enc"
+      },
+      {
+        "version": 3,
+        "created_at": 1775345745.745144,
+        "stored_path": "data/uploads/ab2cb6df-ddea-4867-ac76-0666119a8072.enc"
+      }
+    ],
+    "current_version": 3
   }
 }

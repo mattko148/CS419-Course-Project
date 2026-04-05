@@ -1,10 +1,16 @@
 {
-  "4288cf2c-f591-436c-96ac-52912c20a014": {
-    "username": "foo",
-    "created_at": 1774485384.588535
+  "7amNcwdvQLtJDO6VByHjGQSTyajkUvU6T3OWyWdDPow": {
+    "username": "helloworld123",
+    "created_at": 1775252382.675576,
+    "last_activity": 1775253690.2842462,
+    "ip_address": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
   },
-  "9ddc08f6-47cb-4118-b9a0-f439e443c584": {
-    "username": "abc",
-    "created_at": 1774644670.7498555
+  "taZKTy1ifnbBnI-yBhaHD1datir1hS-um__qHZ7wbb8": {
+    "username": "example123",
+    "created_at": 1775253539.748977,
+    "last_activity": 1775253558.0813854,
+    "ip_address": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
   }
 }

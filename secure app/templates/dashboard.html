@@ -16,12 +16,20 @@
   <div class="flex items-center justify-between" style="margin-bottom:1.75rem;">
     <div>
       <h1 class="page-title">My Documents</h1>
-      <p class="page-subtitle">Upload and share files with other users</p>
+      <p class="page-subtitle">
+        {% if user.role == 'guest' %}
+          Files shared with you — download only
+        {% else %}
+          Upload and share files with other users
+        {% endif %}
+      </p>
     </div>
+    {% if user.role != 'guest' %}
     <label class="btn btn-primary" style="cursor:pointer;">
       ＋ Upload file
       <input type="file" id="file-input" style="display:none" onchange="uploadFile(this)">
     </label>
+    {% endif %}
   </div>
 
   <!-- Hidden upload form -->
@@ -53,8 +61,10 @@
           <td class="text-sm">
             {% if doc.owner == user.username %}
               owner
+            {% elif user.role == 'admin' and user.username not in doc.shared_with %}
+              admin
             {% else %}
-              {{ doc.shared_with[user.username] }}
+              {{ doc.shared_with.get(user.username, 'viewer') }}
             {% endif %}
           </td>
           <td>
@@ -62,7 +72,7 @@
               <a href="/documents/{{ doc.id }}/download"
                  class="btn btn-ghost btn-sm">↓ Download</a>
 
-              {% if doc.owner == user.username %}
+              {% if user.role != 'guest' and doc.owner == user.username %}
               <button class="btn btn-ghost btn-sm"
                       onclick="toggleShare('share-{{ doc.id }}')">Share</button>
               <form method="POST" action="/documents/{{ doc.id }}/delete"
@@ -73,7 +83,7 @@
               {% endif %}
             </div>
 
-            {% if doc.owner == user.username %}
+            {% if user.role != 'guest' and doc.owner == user.username %}
             <div id="share-{{ doc.id }}"
                  style="display:none; margin-top:0.5rem; padding:0.75rem;
                         background:var(--surface2); border-radius:7px;
@@ -108,7 +118,13 @@
   {% else %}
   <div class="card" style="text-align:center; padding:3rem;">
     <div style="font-size:2.5rem; margin-bottom:1rem;">📄</div>
-    <p class="text-muted">No documents yet. Upload your first file.</p>
+    <p class="text-muted">
+      {% if user.role == 'guest' %}
+        No files have been shared with you yet.
+      {% else %}
+        No documents yet. Upload your first file.
+      {% endif %}
+    </p>
   </div>
   {% endif %}
 

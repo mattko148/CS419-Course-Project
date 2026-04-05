@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Admin CS419 Project{% endblock %}
+{% block body %}
+<div class="container">
+  <div class="flex items-center justify-between" style="margin-bottom:1.75rem;">
+    <div>
+      <h1 class="page-title">Admin dashboard</h1>
+      <p class="page-subtitle">Manage users and roles</p>
+    </div>
+    <a href="/dashboard" class="btn btn-ghost btn-sm">← Dashboard</a>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="alert alert-{{ 'success' if cat == 'success' else 'error' }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Registered</th>
+          <th>Status</th>
+          <th>Change role</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for uname, u in users.items() %}
+        <tr>
+          <td style="font-weight:500;">{{ u.username }}</td>
+          <td class="text-muted text-sm">{{ u.email }}</td>
+          <td><span class="badge badge-{{ u.role }}">{{ u.role }}</span></td>
+          <td class="text-muted text-sm">
+            {% if u.created_at %}
+              {{ (u.created_at | int) }}
+            {% endif %}
+          </td>
+          <td>
+            {% if u.locked_until and u.locked_until > 0 %}
+              <span class="text-danger text-sm">Locked</span>
+            {% else %}
+              <span style="color:var(--success); font-size:0.85rem;">Active</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if u.username != user.username %}
+            <form method="POST" action="/admin/users/{{ u.username }}/role"
+                  class="flex gap-2 items-center" style="margin:0;">
+              <select name="role" style="font-size:0.82rem; padding:0.3rem 0.5rem; width:auto;">
+                <option value="admin"  {% if u.role=='admin'  %}selected{% endif %}>admin</option>
+                <option value="user"   {% if u.role=='user'   %}selected{% endif %}>user</option>
+                <option value="guest"  {% if u.role=='guest'  %}selected{% endif %}>guest</option>
+              </select>
+              <button type="submit" class="btn btn-ghost btn-sm">Save</button>
+            </form>
+            {% else %}
+            <span class="text-muted text-sm">You</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

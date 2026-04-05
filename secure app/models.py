@@ -1,6 +1,7 @@
 import json
 import os
 from config import Config
+import time
 
 #check if the path exists. If it doesnt then return an empty dictionary, otherwise open the json file
 #and return it
@@ -77,9 +78,16 @@ def save_document(doc: dict) -> None:
 
 #load the documents, create a list, and for every document this user is a part of
 #whether it is owner or a person the doc is shared with, then add it to result and return this list
-def get_user_documents(username: str) -> list:
+def get_user_documents(username: str, role: str = 'user') -> list:
     """Return all docs owned by or shared with a user."""
     docs = load_documents()
+
+
+    #admin sees every document regardless of ownership or sharing
+    if role == 'admin':
+        return list(docs.values())
+
+    #user and guest only see documents they own or that were shared with them
     result = []
     for doc in docs.values():
         if doc['owner'] == username:
@@ -87,3 +95,21 @@ def get_user_documents(username: str) -> list:
         elif username in doc.get('shared_with', {}):
             result.append(doc)
     return result
+
+#rate limiting
+_rate_store: dict = {}
+
+
+def check_rate_limit(ip: str,
+                     window: int = Config.RATE_LIMIT_WINDOW,
+                     max_attempts: int = Config.RATE_LIMIT_ATTEMPTS) -> bool:
+    """Return True if IP is within limit, False if exceeded."""
+    now = time.time()
+    attempts = _rate_store.get(ip, [])
+    attempts = [t for t in attempts if now - t < window]
+    _rate_store[ip] = attempts
+    if len(attempts) >= max_attempts:
+        return False
+    attempts.append(now)
+    _rate_store[ip] = attempts
+    return True
