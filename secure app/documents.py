@@ -205,7 +205,8 @@ def download_document(doc_id: str, username: str, ip: str, role: str = 'user'):
 
 
 def share_document(doc_id: str, owner: str,
-                   target_user: str, role: str, ip: str):
+                   target_user: str, role: str, ip: str,
+                   user_role: str = 'user'):
     
     #get the document
     doc = get_document(doc_id)
@@ -213,7 +214,7 @@ def share_document(doc_id: str, owner: str,
     if not doc:
         return False, 'Document not found.'
     #if you arent the owner of the doc, then you cant share it
-    if doc['owner'] != owner:
+    if doc['owner'] != owner and user_role != 'admin':
         #log the failed sharing attempt
         log_security('SHARE_DENIED', user_id=owner,
                      details={'doc_id': doc_id}, severity='WARNING', ip=ip)
@@ -233,14 +234,15 @@ def share_document(doc_id: str, owner: str,
     return True, f'Shared with {target_user} as {role}.'
 
 
-def delete_document(doc_id: str, username: str, ip: str):
+def delete_document(doc_id: str, username: str, ip: str,
+                    user_role: str = 'user'):
     #get the doc
     doc = get_document(doc_id)
     #if theres nothing, error 
     if not doc:
         return False, 'Document not found.'
     #if you arent the owner, then you cant delete the document
-    if doc['owner'] != username:
+    if doc['owner'] != username and user_role != 'admin':
         #log the failed deletion event
         log_security('DELETE_DENIED', user_id=username,
                      details={'doc_id': doc_id}, severity='WARNING', ip=ip)

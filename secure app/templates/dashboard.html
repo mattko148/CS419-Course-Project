@@ -72,7 +72,7 @@
               <a href="/documents/{{ doc.id }}/download"
                  class="btn btn-ghost btn-sm">↓ Download</a>
 
-              {% if user.role != 'guest' and doc.owner == user.username %}
+              {% if user.role != 'guest' and (doc.owner == user.username or user.role == 'admin') %}
               <button class="btn btn-ghost btn-sm"
                       onclick="toggleShare('share-{{ doc.id }}')">Share</button>
               <form method="POST" action="/documents/{{ doc.id }}/delete"
@@ -83,7 +83,7 @@
               {% endif %}
             </div>
 
-            {% if user.role != 'guest' and doc.owner == user.username %}
+            {% if user.role != 'guest' and (doc.owner == user.username or user.role == 'admin') %}
             <div id="share-{{ doc.id }}"
                  style="display:none; margin-top:0.5rem; padding:0.75rem;
                         background:var(--surface2); border-radius:7px;

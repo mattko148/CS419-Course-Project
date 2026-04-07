@@ -7,7 +7,7 @@ import os
 from cryptography.fernet import Fernet
 from config import Config
 
-
+#creating an object that holds an encryption key and also the methods to use it
 class EncryptionService:
     def __init__(self):
         os.makedirs(Config.DATA_DIR, exist_ok=True)

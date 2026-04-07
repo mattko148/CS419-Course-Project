@@ -7,7 +7,7 @@
     "created_at": 1775196845.588108,
     "failed_attempts": 0,
     "locked_until": null,
-    "last_login": 1775348574.817569
+    "last_login": 1775540406.1606836
   },
   "example123": {
     "username": "example123",
@@ -17,6 +17,16 @@
     "created_at": 1775251937.905128,
     "failed_attempts": 0,
     "locked_until": null,
-    "last_login": 1775344748.8740873
+    "last_login": 1775538236.4582489
+  },
+  "foobarbaz123": {
+    "username": "foobarbaz123",
+    "email": "foobarbaz123@example.com",
+    "password_hash": "$2b$12$mkmAKshlWWDSx81diYZxg.RxmpAOlU4kgXbZAE7NWxNgyFkvK4txi",
+    "role": "user",
+    "created_at": 1775539534.7782195,
+    "failed_attempts": 0,
+    "locked_until": null,
+    "last_login": 1775539550.811029
   }
 }
