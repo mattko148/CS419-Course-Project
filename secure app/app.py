@@ -20,7 +20,7 @@ from flask import (Flask, g, request, redirect, render_template,
 
 from config import Config
 from auth import (register_user, login_user, load_session_user,
-                  require_auth, require_role, sanitize)
+                  require_auth, require_role, sanitize, change_password)
 from session_manager import session_manager
 from models import (get_user_by_username, load_users,
                     save_user, get_user_documents,
@@ -243,6 +243,30 @@ def delete_doc(doc_id: str):
                                request.remote_addr, g.user['role'])
     flash(msg, 'success' if ok else 'error')
     return redirect('/dashboard')
+
+
+@app.route('/profile/change-password', methods=['GET', 'POST'])
+@require_auth
+def change_password_route():
+    error = None
+    if request.method == 'POST':
+        ok, msg = change_password(
+            g.user['username'],
+            request.form.get('current_password', ''),
+            request.form.get('new_password', ''),
+            request.form.get('confirm_password', ''),
+        )
+        if ok:
+            # destroy all sessions so user must log back in
+            from session_manager import session_manager
+            session_manager.destroy_all_for_user(g.user['username'])
+            response = make_response(redirect('/login'))
+            response.delete_cookie('session_token')
+            flash('Password changed. Please log in again.', 'success')
+            return response
+        error = msg
+    return render_template('change_password.html', user=g.user, error=error)
+ 
 
 
 # ---------------------------------------------------------------------------

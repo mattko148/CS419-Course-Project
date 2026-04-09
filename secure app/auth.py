@@ -129,7 +129,7 @@ def register_user(username: str, email: str,
         'email': email,
         #NOT PLAINTEXT
         'password_hash': pw_hash,   
-        'role': 'user',
+        'role': 'guest',
         'created_at': time.time(),
         'failed_attempts': 0,
         'locked_until': None,
@@ -220,6 +220,48 @@ def login_user(username: str, password: str):
     log_security('LOGIN_SUCCESS', user_id=username, ip=ip, ua=ua)
     return True, token
 
+
+
+def change_password(username: str, current_password: str,
+                    new_password: str, confirm: str):
+    ip = request.remote_addr
+    ua = request.headers.get('User-Agent', '')
+ 
+    user = get_user_by_username(username)
+    if not user:
+        return False, 'User not found.'
+ 
+    # verify current password first
+    if not bcrypt.checkpw(current_password.encode('utf-8'),
+                          user['password_hash'].encode('utf-8')):
+        log_security('PASSWORD_CHANGE_FAILED', user_id=username,
+                     details={'reason': 'wrong current password'},
+                     severity='WARNING', ip=ip, ua=ua)
+        return False, 'Current password is incorrect.'
+ 
+    # validate new password meets requirements
+    error = validate_password(new_password)
+    if error:
+        return False, error
+ 
+    # new password cannot be the same as current
+    if bcrypt.checkpw(new_password.encode('utf-8'),
+                      user['password_hash'].encode('utf-8')):
+        return False, 'New password must be different from current password.'
+ 
+    # confirm passwords match
+    if new_password != confirm:
+        return False, 'New passwords do not match.'
+ 
+    # hash and save new password
+    salt = bcrypt.gensalt(rounds=12)
+    user['password_hash'] = bcrypt.hashpw(
+        new_password.encode('utf-8'), salt).decode('utf-8')
+    save_user(user)
+ 
+    log_security('PASSWORD_CHANGED', user_id=username,
+                 severity='INFO', ip=ip, ua=ua)
+    return True, 'Password changed successfully.'
 
 #ROLE BASED ACCESS CONTROL
 
