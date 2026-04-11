@@ -2,10 +2,10 @@ import os
 import secrets
 
 class Config:
-    # Secret key for Flask (use env var in production)
+    #secret key stuff, but always actually uses the secrets.token_hex(32) because we never set a secret key 
     SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 
-    # File paths
+    #file paths
     DATA_DIR = 'data'
     LOGS_DIR = 'logs'
     UPLOADS_DIR = 'data/uploads'
@@ -16,30 +16,33 @@ class Config:
     SECURITY_LOG = 'logs/security.log'
     ACCESS_LOG = 'logs/access.log'
 
-    # Session settings
+    #session timer
     SESSION_TIMEOUT = 1800  # 30 minutes
 
-    # Account lockout (added week 3)
+    #account lockout stuff
     MAX_FAILED_ATTEMPTS = 5
     LOCKOUT_DURATION = 900  # 15 minutes
 
-    # Rate limiting per IP (added week 3)
+    #rate limiting
     RATE_LIMIT_ATTEMPTS = 10
-    RATE_LIMIT_WINDOW = 60  # seconds
+    #60 seconds
+    RATE_LIMIT_WINDOW = 60  
 
-    # Password requirements (added week 3)
+    #minimum password length
     PASSWORD_MIN_LENGTH = 12
 
-    # Username requirements (added week 3)
+    #username requirements
     USERNAME_MIN = 3
     USERNAME_MAX = 20
 
-    # File upload settings (hardened week 3)
+    #file upload restrictions
     ALLOWED_EXTENSIONS = {'pdf', 'txt', 'docx', 'png', 'jpg', 'jpeg'}
-    MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+    #10 MB limit
+    MAX_UPLOAD_BYTES = 10 * 1024 * 1024  
 
-    # TLS
+    #certificate and key stuff
     SSL_CERT = os.environ.get('SSL_CERT', 'cert.pem')
     SSL_KEY = os.environ.get('SSL_KEY', 'key.pem')
 
+    #we never set flask env, so we just always use development again
     ENV = os.environ.get('FLASK_ENV', 'development')

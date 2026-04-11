@@ -29,13 +29,14 @@ def load_users() -> dict:
 def save_users(users: dict) -> None:
     _save(Config.USERS_FILE, users)
 
-#using the dictionary returned by load users, get the user with the username
+#using the dictionary returned by load users, get the user with the username. return none if no one is found
 def get_user_by_username(username: str):
     return load_users().get(username)
 
 #use the dictionary and iterate through the dictionary to find which user has the specific email
 def get_user_by_email(email: str):
     for user in load_users().values():
+        #compare the emails to see if they are the same (non case sensitive)
         if user.get('email', '').lower() == email.lower():
             return user
     return None
@@ -52,7 +53,7 @@ def save_user(user: dict) -> None:
 def load_sessions() -> dict:
     return _load(Config.SESSIONS_FILE)
 
-#with this sessions dictionary, update the sessions file with this new update sessions.
+#with this sessions dictionary, update the sessions file with this new updated sessions.
 def save_sessions(sessions: dict) -> None:
     _save(Config.SESSIONS_FILE, sessions)
 
@@ -70,7 +71,7 @@ def save_documents(docs: dict) -> None:
 def get_document(doc_id: str):
     return load_documents().get(doc_id)
 
-#using the document's own id, update only this document in the docs 
+#using the document's own id (input), update only this document in the docs 
 def save_document(doc: dict) -> None:
     docs = load_documents()
     docs[doc['id']] = doc
@@ -97,6 +98,8 @@ def get_user_documents(username: str, role: str = 'user') -> list:
     return result
 
 #rate limiting
+
+#dictionary to keep track of recent attempts for each account
 _rate_store: dict = {}
 
 
@@ -105,11 +108,17 @@ def check_rate_limit(ip: str,
                      max_attempts: int = Config.RATE_LIMIT_ATTEMPTS) -> bool:
     """Return True if IP is within limit, False if exceeded."""
     now = time.time()
+    #gets the list for the ip input, and returns an empty list if there are no records
     attempts = _rate_store.get(ip, [])
+    #only keep the attempts that are withing 60 seconds
     attempts = [t for t in attempts if now - t < window]
+    #save the new updated list of last 60 seconds
     _rate_store[ip] = attempts
+    #if the number of attempts is greater to or equal the max attempts, then return false (RATE LIMIT IS EXCEEDED)
     if len(attempts) >= max_attempts:
         return False
+    #if it is within the rate limit, append the current time to the list
     attempts.append(now)
+    #save the new updated list again
     _rate_store[ip] = attempts
     return True

@@ -29,27 +29,34 @@ from documents import (upload_document, download_document,
                        share_document, delete_document)
 from logger import log_security, log_access
 
+#creating flask application named app
 app = Flask(__name__)
+#using secret key from config (actually random number using secrets)
 app.secret_key = Config.SECRET_KEY
 
+#creating directories if they dont already exist
 os.makedirs(Config.DATA_DIR, exist_ok=True)
 os.makedirs(Config.LOGS_DIR, exist_ok=True)
 os.makedirs(Config.UPLOADS_DIR, exist_ok=True)
 
 
-# ---------------------------------------------------------------------------
-# Load session user before every request (replaces week 2 inline logic)
-# ---------------------------------------------------------------------------
 
+#get the session token from browser, checks if it exists and if it is still valid, 
+#loads the user and does this check each time a new page is visited
+#sets g.user
 @app.before_request
 def load_user():
+    #in auth.py
     load_session_user()
 
-
+#after the route function (like /login, /dashboard, etc) is completed, do this method.
 @app.after_request
 def set_security_headers(response):
+    #tells browsers what sources are allowed to load content
+    #default-src 'self' means only load stuff from our server 
     response.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
+        #avoiding unsafe inline in production
         "script-src 'self' 'unsafe-inline'; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data:; "
@@ -57,26 +64,36 @@ def set_security_headers(response):
         "connect-src 'self'; "
         "frame-ancestors 'none'"
     )
+    #prevent clickjacking 
     response.headers['X-Frame-Options'] = 'DENY'
+    #prevent MIME type sniffing, stops browser from needing to guess file type
     response.headers['X-Content-Type-Options'] = 'nosniff'
+    #XSS protection (legacy but still useful), tells older browsers to block pages if they detect XSS
     response.headers['X-XSS-Protection'] = '1; mode=block'
+    #referrer policy, controls what url info is sent when clicking link
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    #permissions policy, disables unused browser features like geolocation, microphone, and camera
     response.headers['Permissions-Policy'] = (
         'geolocation=(), microphone=(), camera=()'
     )
+    #hsts (strict transport security). Says to ALWAYS use HTTPS 
     response.headers['Strict-Transport-Security'] = (
         'max-age=31536000; includeSubDomains'
     )
     return response
 
-
+#runs before route functions, FORCING HTTPS
+#if the env is NOT development and NOT secure (not https)
 @app.before_request
 def enforce_https():
     if Config.ENV != 'development' and not request.is_secure:
+        #replace the http part with https
         url = request.url.replace('http://', 'https://', 1)
+        #redirect to that new url
         return redirect(url, code=301)
 
-
+#runs after security headers are added and then logs who did what and what the result was
+#also logs the http status code
 @app.after_request
 def access_log(response):
     log_access(
@@ -89,22 +106,19 @@ def access_log(response):
     return response
 
 
-# ---------------------------------------------------------------------------
-# Generic error handlers — never leak internal details to the user
-# ---------------------------------------------------------------------------
-
+#no permission
 @app.errorhandler(403)
 def forbidden(e):
     return render_template('error.html', code=403,
                            message='You do not have permission to access this page.'), 403
 
-
+#page doesnt exist
 @app.errorhandler(404)
 def not_found(e):
     return render_template('error.html', code=404,
                            message='Page not found.'), 404
 
-
+#some server error
 @app.errorhandler(500)
 def server_error(e):
     log_security('SERVER_ERROR', details={'error': str(e)},
@@ -113,55 +127,73 @@ def server_error(e):
                            message='Something went wrong. Please try again later.'), 500
 
 
-# ---------------------------------------------------------------------------
-# Public routes
-# ---------------------------------------------------------------------------
 
+#redirects to login or dashboard depending on if there is a user inside g.user
 @app.route('/')
 def index():
     return redirect('/dashboard' if g.user else '/login')
 
-
+#page to register and create an account with GET and POST methods
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    #if there is a user loaded into g.user, then there is no reason to be at the register page, go to their dashboard
     if g.user:
         return redirect('/dashboard')
     error = None
+    #skips over this the first time because first request is GET.
+    #once it comes around a second time (the user entered a username and password then clicked submit), the method is POST
+    #then runs these statements
     if request.method == 'POST':
+        #pass all of the input from the received request from browser into the 
+        #register user method which will sanitize and check if everything is valid
         ok, msg = register_user(
             request.form.get('username', ''),
             request.form.get('email', ''),
             request.form.get('password', ''),
             request.form.get('confirm_password', ''),
         )
+        #if its ok, then show a message and redirect to the login page
         if ok:
             flash('Account created! Please log in.', 'success')
             return redirect('/login')
         error = msg
+    #first time when browser sends GET (first visiting page), render this first with empty template
+    #if successful account created, then it should go to login, but if not then render the template again with the error        
     return render_template('register.html', error=error)
 
-
+#goes to page that allows user to login using their username and password. Also allows them to redirect to the register account page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    #same as above, no reason to be in the login page if the user is logged in.
+    #if there is a user in g.user then go to their dashboard
     if g.user:
         return redirect('/dashboard')
     error = None
+    #default GET again, skips over this the first time it loads (renders the template below), 
+    #then when the user clicks a submit button, then it sends a POST
     if request.method == 'POST':
+        #get the username and password from the received request and enters it into the login_user method
         ok, result = login_user(
             request.form.get('username', ''),
             request.form.get('password', ''),
         )
         if ok:
+            #create an object so you can redirect with the cookie
             response = make_response(redirect('/dashboard'))
             response.set_cookie(
                 'session_token', result,
-                httponly=True,                              # week 3: JS cannot read token
-                secure=(Config.ENV != 'development'),       # week 3: HTTPS only
-                samesite='Strict',                         # week 3: CSRF protection
+                #only http can read token, no javascript
+                httponly=True,                              
+                #https only
+                secure=(Config.ENV != 'development'),       
+                #csrf protection
+                samesite='Strict',     
+                #max 30 min                    
                 max_age=Config.SESSION_TIMEOUT,
             )
             return response
         error = result
+    #first time visiting renders empty html page, shouldnt reach here if successful. if theres an error load this template again with error
     return render_template('login.html', error=error)
 
 

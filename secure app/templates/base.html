@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}SecureDocs{% endblock %}</title>
+  <title>{% block title %}CS419 Project{% endblock %}</title>
   <style>
     :root {
       --bg: #0f1117;
@@ -140,7 +140,7 @@
 
 {% if g.user %}
 <nav>
-  <div class="nav-brand">Secure<span>Docs</span></div>
+  <div class="nav-brand">CS419<span>Project</span></div>
   <div class="nav-right">
     <span class="nav-user">{{ g.user.username }}</span>
     <span class="badge badge-{{ g.user.role }}">{{ g.user.role }}</span>

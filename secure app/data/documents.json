@@ -42,5 +42,26 @@
       }
     ],
     "current_version": 1
+  },
+  "9658d20e-31fc-45db-b755-59a2422877df": {
+    "id": "9658d20e-31fc-45db-b755-59a2422877df",
+    "original_name": "Test_file_1_1.txt",
+    "extension": "txt",
+    "owner": "example123",
+    "shared_with": {},
+    "created_at": 1775877518.7015355,
+    "versions": [
+      {
+        "version": 1,
+        "created_at": 1775877518.7015355,
+        "stored_path": "data/uploads\\9658d20e-31fc-45db-b755-59a2422877df.enc"
+      },
+      {
+        "version": 2,
+        "created_at": 1775878121.0410867,
+        "stored_path": "data/uploads\\9658d20e-31fc-45db-b755-59a2422877df.enc"
+      }
+    ],
+    "current_version": 2
   }
 }
