@@ -73,8 +73,8 @@ def upload_document(file_storage, owner: str, ip: str):
     #make an upload directory if it isnt there already
     os.makedirs(Config.UPLOADS_DIR, exist_ok=True)
 
-# Check if this owner already has a file with the same name
-    # If so, replace it instead of creating a duplicate
+    #check if this owner already has a file with the same name
+    #if so, replace it instead of creating a duplicate
     existing_doc = None
     for doc in load_documents().values():
         if doc['original_name'] == filename and doc['owner'] == owner:

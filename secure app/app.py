@@ -196,70 +196,109 @@ def login():
     #first time visiting renders empty html page, shouldnt reach here if successful. if theres an error load this template again with error
     return render_template('login.html', error=error)
 
-
+#logout route, only needs the post method since we dont need to see anything, just want flask to do something
 @app.route('/logout', methods=['POST'])
 def logout():
+    #get the session token from the request
     token = request.cookies.get('session_token')
+    #IMPORTANT, if it still exists afterward then if someone gets this token later,
+    #they can use this token to log in as someone else without username or password.
+    #if you get rid of it from the json (like this) then even if someone obtains the token,
+    #it is still useless because the session DOES NOT EXIST, and does NOT allow someone to 
+    #log in without username and password
     if token:
         session_manager.destroy(token)
+    #create an object so you can redirect while destroying cookie
     response = make_response(redirect('/login'))
     response.delete_cookie('session_token')
     return response
 
 
-# ---------------------------------------------------------------------------
-# Authenticated routes — now use @require_auth instead of manual checks
-# ---------------------------------------------------------------------------
 
+#default to GET method and go to dashboard if there is a user
+#using require_auth so it directs back to login if there is no g.user at the time
 @app.route('/dashboard')
 @require_auth
 def dashboard():
-    # pass role so admin sees all documents, others see only own/shared
+    #pass in the name and role to get user documents
+    #username is to see if it has been shared to them or if they are the owner
+    #passing role in because if they are admin, then they should be able to see ALL of the documents
     docs = get_user_documents(g.user['username'], g.user['role'])
+    #render template with variables (matching user in parameter to the variables in the html)
     return render_template('dashboard.html', user=g.user, documents=docs)
 
-
+#upload a file, dont need to show anything so just POST method again.
+#require auth to kick back to login page if not authenticated (no g.user)
 @app.route('/documents/upload', methods=['POST'])
 @require_auth
 def upload():
-    # guests cannot upload
+    #guests cannot upload, probably shouldnt even be able to see upload button
     if g.user['role'] == 'guest':
         flash('Guests cannot upload files.', 'error')
+        #go back to dashboard
         return redirect('/dashboard')
+    #if there was no file in the request or if the file name is empty 
     if 'file' not in request.files or not request.files['file'].filename:
         flash('No file selected.', 'error')
         return redirect('/dashboard')
+    #sanitize, check the size, replace old file (if has same name), encrypt, save the document, log the event
+    #lot of stuff was moved from here to the documents.py file
     ok, result = upload_document(
         request.files['file'], g.user['username'], request.remote_addr)
+    #flash file uploaded and encrypted if "ok" is true and success, otherwise if ok is false then say error
     flash('File uploaded and encrypted.' if ok else result,
           'success' if ok else 'error')
     return redirect('/dashboard')
 
-
+#just GET method
+#
 @app.route('/documents/<doc_id>/download')
 @require_auth
 def download(doc_id: str):
+    #convert any "-" characters to nothing and checks if the input is ONLY letters and numbers (alphanumaric)
+    #stops if the format is wrong at all and aborts. 
+    #prevents users from trying to inject things into the url
     if not doc_id.replace('-', '').isalnum():
         abort(400)
+    #return T/F, the decrypted bytes, and the files name after it calls download document
+    #passes in the doc id, username, ip, and role
     ok, data, filename = download_document(
         doc_id, g.user['username'], request.remote_addr, g.user['role'])
+    #if the download failed, then just flash an error and redirect instead of crashing
     if not ok:
         flash(data, 'error')
         return redirect('/dashboard')
+    #if it succeeded the send the data
+    #io.BytesIO wraps the decrypted bytes into a file like object 
+    #download_name just tells the browser what to name the the file when saving instead of the uuid
+    #as_attachment tells the browser to download the file and not to open it into the browser 
     return send_file(io.BytesIO(data), download_name=filename, as_attachment=True)
 
-
+#just POST method because nothing to display, just do
 @app.route('/documents/<doc_id>/share', methods=['POST'])
 @require_auth
 def share(doc_id: str):
-    # guests cannot share
+    #guests cannot share, shouldnt even be able to get here
     if g.user['role'] == 'guest':
         flash('Guests cannot share files.', 'error')
         return redirect('/dashboard')
+    #same thing as download,
+    #convert any "-" characters to nothing and checks if the input is ONLY letters and numbers (alphanumaric)
+    #stops if the format is wrong at all and aborts. 
+    #prevents users from trying to inject things into the url    
     if not doc_id.replace('-', '').isalnum():
         abort(400)
+    #cleans up the username with html.escape (function in auth.py)
     target = sanitize(request.form.get('username', ''))
+    #gets the selected role from the request of "viewer" or "editor" though they dont actually change anything that they can do
     role = request.form.get('role', 'viewer')
+    #call share documents with these parameters because:
+    #doc_id: which document
+    #g.user['username']: which user is sharing?
+    #target is who they want to share with
+    #role is what role they are getting (viewer/editor)
+    #ip for logging
+    #g.user['role'] in case the user is admin, so the admin can also share any file
     ok, msg = share_document(doc_id, g.user['username'], target, role,
                               request.remote_addr, g.user['role'])
     flash(msg, 'success' if ok else 'error')
@@ -269,34 +308,50 @@ def share(doc_id: str):
 @app.route('/documents/<doc_id>/delete', methods=['POST'])
 @require_auth
 def delete_doc(doc_id: str):
+    #same thing as download,
+    #convert any "-" characters to nothing and checks if the input is ONLY letters and numbers (alphanumaric)
+    #stops if the format is wrong at all and aborts. 
+    #prevents users from trying to inject things into the url  
     if not doc_id.replace('-', '').isalnum():
         abort(400)
+    #pass into delete_document
+    #doc_id for what doc
+    #g.user['username'] to check is this the owner of the doc
+    #remote_addr for ip for logging
+    #g.user['role'] to see if they are admin because admin can delete any doc
     ok, msg = delete_document(doc_id, g.user['username'],
                                request.remote_addr, g.user['role'])
     flash(msg, 'success' if ok else 'error')
     return redirect('/dashboard')
 
-
+#GET POST because need to display and submit stuff
 @app.route('/profile/change-password', methods=['GET', 'POST'])
 @require_auth
 def change_password_route():
+    #error is initially none
     error = None
+    #skips when user first opens page
+    #once the user submits (sends a request with POST), then run this stuff
     if request.method == 'POST':
+        #pass info from the request into the change_password
         ok, msg = change_password(
             g.user['username'],
             request.form.get('current_password', ''),
             request.form.get('new_password', ''),
             request.form.get('confirm_password', ''),
         )
+        #if change_password was successful, then destroy any sessions for this user that are still active
         if ok:
-            # destroy all sessions so user must log back in
             from session_manager import session_manager
             session_manager.destroy_all_for_user(g.user['username'])
+            #once again create and object so you can redirect while deleting the cookie
             response = make_response(redirect('/login'))
             response.delete_cookie('session_token')
             flash('Password changed. Please log in again.', 'success')
             return response
         error = msg
+    #renders the template 
+    #its empty on first GET request, and if it reaches here during the POST, then display the error message of why it failed
     return render_template('change_password.html', user=g.user, error=error)
  
 
