@@ -1,6 +1,13 @@
+CS419 Secure Web Application Project
+By Matthew Ko & Michael Zdunek
+========================
+
+This project is a web application that allows users to create an account, upload, share, download, and delete documents.  
+
+
 How to run the program
 
-Using linux (SSH) DID NOT WORK ON ILABS!!!
+Using linux (SSH) - Note: Linux/SSH setup was tested but did not work on iLab servers. Use Windows setup instead.
 
 be in secure app directory
 
@@ -12,7 +19,7 @@ python3 app.py
 
 ------------------------
 
-on windows:
+On windows:
 
 secure app directory
 
@@ -20,7 +27,8 @@ Create your certificate with
 
 openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
 
-(powershell thing did not allow scripts so)
+(Note: PowerShell may block script execution, so run this first:)
+
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 python -m venv venv
 venv\Scripts\activate
@@ -62,7 +70,7 @@ To upload: Simply click the upload button and select the file you would like to 
 
 To download: click the download button on a file they either you have uploaded OR has been shared to you
 
-To share: click the share button, type the username you would like to share to, select what powers they have on the file of viewer or editor (Those roles don't actually do anything!)
+To share: click the share button, type the username you would like to share to, select what powers they have on the file of viewer or editor (Note: viewer and editor sharing roles are implemented but currently have no functional difference.)
 
 To delete: click the delete button then confirm
 
@@ -72,3 +80,7 @@ confirm the new password is the same
 To reach the ADMIN DASHBOARD (admin only!): look to the top right of the screen to find an "Admin" button.
 To change an account role, go to the drop down for the account name and change it to whatever you would like and click save. Navigate back to your normal dashboard by clicking the dashboard button
 
+
+the data/secret.key should not be deleted or shared because it is the encryption key required for all of the uploaded documents
+
+The security and access logs can be found inside logs/security.log and logs/access.log

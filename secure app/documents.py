@@ -126,7 +126,6 @@ def upload_document(file_storage, owner: str, ip: str):
     #the absolute path to the directory
     #this would be data/uploads, so it would add the absolute path of our current directory to this
     base = os.path.abspath(Config.UPLOADS_DIR)
-    #strips away any dangerous path names like ../../ or whatever to navigate through directories and combines
     #stored path with absolute path of running directory
     full = os.path.abspath(stored_path)
 

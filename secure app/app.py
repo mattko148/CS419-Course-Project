@@ -243,6 +243,7 @@ def upload():
         return redirect('/dashboard')
     #sanitize, check the size, replace old file (if has same name), encrypt, save the document, log the event
     #lot of stuff was moved from here to the documents.py file
+    #request.files['file'] is the filename given in the request object
     ok, result = upload_document(
         request.files['file'], g.user['username'], request.remote_addr)
     #flash file uploaded and encrypted if "ok" is true and success, otherwise if ok is false then say error
@@ -356,59 +357,84 @@ def change_password_route():
  
 
 
-# ---------------------------------------------------------------------------
-# Admin routes — added week 3 with @require_role
-# ---------------------------------------------------------------------------
 
+#just GET method, require authentication (needs to be logged in), and MUST be admin. 
+#calls admin_dashboard() when someone visits /admin 
 @app.route('/admin')
 @require_auth
 @require_role('admin')
 def admin_dashboard():
+    #renders the admin html template and passes two variables user=g.user and user=load_users()
     return render_template('admin.html', user=g.user, users=load_users())
 
-
+#only POST since this is just a form. requires user to be logged in AND have admin role
 @app.route('/admin/users/<username>/role', methods=['POST'])
 @require_auth
 @require_role('admin')
 def change_role(username: str):
+    #runs the html.escape() on the username from the url to prevent any injection attempts
     username = sanitize(username)
+    #getting the selected role from the dropdown form. this defaults to user if nothing is selected
     new_role = request.form.get('role', 'user')
+    #whitelist check to see if someone tried to make some new role
     if new_role not in ('admin', 'user', 'guest'):
+        #flash an error and go back to the admin dashboard
         flash('Invalid role.', 'error')
         return redirect('/admin')
+    #look up the account being changed inside users.json
     target = get_user_by_username(username)
+    #if the username doesnt exist in the dictionary then flash an error and go back to the admin page
     if not target:
         flash('User not found.', 'error')
         return redirect('/admin')
+    #just makes sure that the admin (yourself) cant change their own role and accidentally lock themselves out
     if username == g.user['username']:
         flash('You cannot change your own role.', 'error')
         return redirect('/admin')
+    #updates the targets role
     target['role'] = new_role
+    #saves the updated user info back to users.json
     save_user(target)
 
-    # if downgraded to guest, restrict all document permissions to viewer
-    # per Piazza: guests should only be able to download (read-only)
+    #if downgraded to guest, restrict all document permissions to viewer
+    #guests should be READ ONLY!
     if new_role == 'guest':
+        #loading all documents from load_documents
         docs = load_documents()
+        #check if any documents were changed or not 
         changed = False
+        #loop through all docs 
         for doc in docs.values():
+            #check if the document was shared with this user
             if username in doc.get('shared_with', {}):
+                #change their role to viewer on the document
                 doc['shared_with'][username] = 'viewer'
+                #something was changed, change this to be true
                 changed = True
+        #since it was changed, we need to update it in the documents json
         if changed:
             save_documents(docs)
-
+    #log the role change. this logs who made the change, what account was changed, and what the new role is
     log_security('ROLE_CHANGED', user_id=g.user['username'],
                  details={'target': username, 'new_role': new_role},
                  ip=request.remote_addr)
+    #flash a successful message
     flash(f'Role updated for {username}.', 'success')
     return redirect('/admin')
 
 
 if __name__ == '__main__':
+    #no ssl context by default 
     ssl_ctx = None
+    #checks if both cert.pem and key.pem actually exist before trying to use them
     if os.path.exists(Config.SSL_CERT) and os.path.exists(Config.SSL_KEY):
+        #if both files exist, then create a tuple that has both paths to the files
+        #flask then accepts this as an ssl context, telling it where to find the certificate and private key
         ssl_ctx = (Config.SSL_CERT, Config.SSL_KEY)
+    #starts flask development server with debug OFF
+    #pass the ssl context into flask. if ssl context is none, then run without https
+    #host 0.0.0.0 tells flask to listen on all network interfaces and not just the local host (allows other devices to access)
+    #port 5000 runs the app on port 5000
     app.run(debug=False,  # debug OFF in week 3+
             ssl_context=ssl_ctx,
             host='0.0.0.0',

@@ -1,30 +1,4 @@
 {
-  "ab2cb6df-ddea-4867-ac76-0666119a8072": {
-    "id": "ab2cb6df-ddea-4867-ac76-0666119a8072",
-    "original_name": "Test_file_1.txt",
-    "extension": "txt",
-    "owner": "helloworld123",
-    "shared_with": {},
-    "created_at": 1775345736.6320436,
-    "versions": [
-      {
-        "version": 1,
-        "created_at": 1775345736.6320436,
-        "stored_path": "data/uploads/ab2cb6df-ddea-4867-ac76-0666119a8072.enc"
-      },
-      {
-        "version": 2,
-        "created_at": 1775345740.06058,
-        "stored_path": "data/uploads/ab2cb6df-ddea-4867-ac76-0666119a8072.enc"
-      },
-      {
-        "version": 3,
-        "created_at": 1775345745.745144,
-        "stored_path": "data/uploads/ab2cb6df-ddea-4867-ac76-0666119a8072.enc"
-      }
-    ],
-    "current_version": 3
-  },
   "a8d34c7a-970a-420b-b0ab-187619994a9c": {
     "id": "a8d34c7a-970a-420b-b0ab-187619994a9c",
     "original_name": "Test_file_1_1.txt",
@@ -43,25 +17,57 @@
     ],
     "current_version": 1
   },
-  "9658d20e-31fc-45db-b755-59a2422877df": {
-    "id": "9658d20e-31fc-45db-b755-59a2422877df",
-    "original_name": "Test_file_1_1.txt",
+  "68333408-6cb8-4638-990b-8d587b07f3ee": {
+    "id": "68333408-6cb8-4638-990b-8d587b07f3ee",
+    "original_name": "scriptalert1_script.txt",
     "extension": "txt",
     "owner": "example123",
     "shared_with": {},
-    "created_at": 1775877518.7015355,
+    "created_at": 1776420718.9959428,
     "versions": [
       {
         "version": 1,
-        "created_at": 1775877518.7015355,
-        "stored_path": "data/uploads\\9658d20e-31fc-45db-b755-59a2422877df.enc"
+        "created_at": 1776420718.9959428,
+        "stored_path": "data/uploads\\68333408-6cb8-4638-990b-8d587b07f3ee.enc"
       },
       {
         "version": 2,
-        "created_at": 1775878121.0410867,
-        "stored_path": "data/uploads\\9658d20e-31fc-45db-b755-59a2422877df.enc"
+        "created_at": 1776420808.1612937,
+        "stored_path": "data/uploads\\68333408-6cb8-4638-990b-8d587b07f3ee.enc"
       }
     ],
     "current_version": 2
+  },
+  "3121196d-c243-4cb4-8069-c6aa868b26ea": {
+    "id": "3121196d-c243-4cb4-8069-c6aa868b26ea",
+    "original_name": "double_exten.php.txt",
+    "extension": "txt",
+    "owner": "example123",
+    "shared_with": {},
+    "created_at": 1776480200.444192,
+    "versions": [
+      {
+        "version": 1,
+        "created_at": 1776480200.444192,
+        "stored_path": "data/uploads\\3121196d-c243-4cb4-8069-c6aa868b26ea.enc"
+      }
+    ],
+    "current_version": 1
+  },
+  "0d226c8a-4677-448b-ab2a-a3f31f4fa129": {
+    "id": "0d226c8a-4677-448b-ab2a-a3f31f4fa129",
+    "original_name": "Test_file_1.txt",
+    "extension": "txt",
+    "owner": "example123",
+    "shared_with": {},
+    "created_at": 1776482794.1564841,
+    "versions": [
+      {
+        "version": 1,
+        "created_at": 1776482794.1564841,
+        "stored_path": "data/uploads\\0d226c8a-4677-448b-ab2a-a3f31f4fa129.enc"
+      }
+    ],
+    "current_version": 1
   }
 }
