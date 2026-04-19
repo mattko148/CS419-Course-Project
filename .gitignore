@@ -15,6 +15,7 @@ key.pem
 data/sessions.json
 data/documents.json
 data/uploads/
+data/users.json
 
 # Log files — contain sensitive security events
 logs/
