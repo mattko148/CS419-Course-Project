@@ -1,0 +1,80 @@
+{
+  "helloworld123": {
+    "username": "helloworld123",
+    "email": "Helloworld123@foo.com",
+    "password_hash": "$2b$12$oiRMgKaUrNVMCd4AwiOJJuislncBSUa0ur64WYj6cz3Xxb8gN4v/q",
+    "role": "admin",
+    "created_at": 1775196845.588108,
+    "failed_attempts": 0,
+    "locked_until": null,
+    "last_login": 1776500856.565803
+  },
+  "example123": {
+    "username": "example123",
+    "email": "example@example.com",
+    "password_hash": "$2b$12$r74ro.mVcBQzNk487pFtRee9U/i.1O4cWEulLi8ldlYsPnfZmLY4K",
+    "role": "user",
+    "created_at": 1775251937.905128,
+    "failed_attempts": 0,
+    "locked_until": null,
+    "last_login": 1776500317.5870428
+  },
+  "foobarbaz123": {
+    "username": "foobarbaz123",
+    "email": "foobarbaz123@example.com",
+    "password_hash": "$2b$12$EjHG91XXTZQMAFCh7gi2Ie9DQW77/4utle0FmwbvPRMPNZWErrLrW",
+    "role": "user",
+    "created_at": 1775539534.7782195,
+    "failed_attempts": 2,
+    "locked_until": null,
+    "last_login": 1775724704.8892283
+  },
+  "foobarbaz12345": {
+    "username": "foobarbaz12345",
+    "email": "foobarbaz12345@example.com",
+    "password_hash": "$2b$12$7sfUXZSGEJNm.JVPM3nKSO4/oxc7qcRr8crwAL.ETTbWK1V3v6KZK",
+    "role": "guest",
+    "created_at": 1775724944.0282238,
+    "failed_attempts": 0,
+    "locked_until": null,
+    "last_login": 1776468039.418841
+  },
+  "testuser": {
+    "username": "testuser",
+    "email": "testuser123@example.com",
+    "password_hash": "$2b$12$MJBTP05GMUNOtXNSfGfcteqZCB3Kj.14Q6ttJ22tNvxLNI1ljd.lO",
+    "role": "guest",
+    "created_at": 1776028073.4270563,
+    "failed_attempts": 0,
+    "locked_until": 1776028999.9181333
+  },
+  "test": {
+    "username": "test",
+    "email": "test@example.com",
+    "password_hash": "$2b$12$JNNuy.jp3exncWI2BgsY4uIP1yzXhaH6tGTJzGRck736p04lp0II2",
+    "role": "guest",
+    "created_at": 1776395819.7989771,
+    "failed_attempts": 0,
+    "locked_until": null
+  },
+  "passwordreset": {
+    "username": "passwordreset",
+    "email": "pass@example.com",
+    "password_hash": "$2b$12$jkNSk42qLYhhYxzjXo2lduW6RhePrhzIs15r2V/WaD60Aoavcdghm",
+    "role": "user",
+    "created_at": 1776397799.0687847,
+    "failed_attempts": 0,
+    "locked_until": null,
+    "last_login": 1776397827.7953885
+  },
+  "demo123": {
+    "username": "demo123",
+    "email": "demo123@demo.com",
+    "password_hash": "$2b$12$oQTOs.mKEIuA0ZhyEK2JUOsB8vAk2sNEKiyqSpb295ndRO7xiJzUy",
+    "role": "user",
+    "created_at": 1776500789.8105557,
+    "failed_attempts": 0,
+    "locked_until": null,
+    "last_login": 1776500806.6869912
+  }
+}

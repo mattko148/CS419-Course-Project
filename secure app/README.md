@@ -2,14 +2,22 @@ CS419 Secure Web Application Project
 By Matthew Ko & Michael Zdunek
 ========================
 
-This project is a web application that allows users to create an account, upload, share, download, and delete documents.  
+This project is a web application that allows users to create an account, upload, share, download, and delete documents. Some directories (such as data) may not initially exist but will be created when you run the application.
 
+
+Note: Claude.ai was used throughout this project as a learning aid to help explain concepts, generate and debug code, clean up documents, and walk through security implementations. All code has been commented and understood by us. The comments throughout the code shows our understanding of what each part of the code does.
+
+----------------------------
 
 How to run the program
 
 Using linux (SSH) - Note: Linux/SSH setup was tested but did not work on iLab servers. Use Windows setup instead.
 
 be in secure app directory
+
+Create your certificate with 
+
+openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
 
 python3 -m venv venv
 source venv/bin/activate
